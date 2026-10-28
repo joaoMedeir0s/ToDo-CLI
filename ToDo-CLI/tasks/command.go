@@ -9,14 +9,7 @@ import (
 )
 
 func nextID(tasks []Task) int {
-	max := 0
-	for _, task := range tasks {
-		if task.ID > max {
-			max = task.ID
-		}
-	}
-
-	return max + 1
+	return len(tasks)
 }
 
 func readID(args []string) (int, error) {
@@ -71,12 +64,67 @@ func cmdList() error {
 	// lembrando que a função range dá o index (primeiro retorno)
 	// e o elemento nesse index (segunto retorno)
 	for _, task := range tasks {
-		check := " "
+		check := " " // := (usado para declarar nova variavel)
 		if task.Completed {
-			check = "✅"
+			check = "✅" // = (usado para atribuir novo valor)
 		}
 		fmt.Printf("[%s] %d - %s\n", check, task.ID, task.Title)
 	}
 	return nil
+}
 
+func cmdDone(args []string) error {
+	id, err := readID(args)
+	if err != nil {
+		return err
+	}
+
+	tasks, err := load()
+	if err != nil {
+		return err
+	}
+
+	if id >= len(tasks) || id < 0 {
+		return errors.New("Invalid ID")
+	}
+
+	tasks[id].Completed = true
+	if err := save(tasks); err != nil {
+		return err
+	}
+
+	fmt.Printf("Task: %d marked as concluded!", id)
+
+	return nil
+}
+
+func cmdRemove(args []string) error {
+	id, err := readID(args)
+	if err != nil {
+		return err
+	}
+
+	tasks, err := load()
+	if err != nil {
+		return err
+	}
+
+	if verifyId(tasks, id) != nil {
+		return err
+	}
+
+	tasks = append(tasks[:id], tasks[id+1:]...)
+	if err := save(tasks); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func verifyId(tasks []Task, id int) error {
+	if id < 0 || id >= len(tasks) {
+		return errors.New("ID INVÁLIDO")
+	}
+
+	return nil
 }

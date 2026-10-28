@@ -32,3 +32,14 @@ func load() ([]Task, error) {
 	return tasks, nil
 
 }
+
+func save(tasks []Task) error {
+	data, err := json.MarshalIndent(tasks, "", " ")
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(tasksFile, data, 0644)
+
+}
